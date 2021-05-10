@@ -1,0 +1,54 @@
+version: '3.5'
+
+services:
+  confluence:
+    image: atlassian/confluence
+    container_name: confluence
+    hostname: confluence
+    restart: always
+    networks:
+      - confluence_network
+    volumes:
+      - confluence_data:/opt/atlassian
+      - confluence_home:/var/atlassian
+    ports:
+      - '8090:8090'
+      - '8091:8091'
+    environment:
+      - ATL_JDBC_URL=jdbc=postgresql://postgresql:5432/confluence_database
+      - ATL_JDBC_USER=confluence_database_user
+      - ATL_JDBC_PASSWORD=confluence_database_password
+      - ATL_DB_TYPE=postgresql
+      - ATL_PROXY_NAME=confluence.<url>
+      - ATL_TOMCAT_SCHEME=https
+      - ATL_TOMCAT_SECURE=true
+      - ATL_PROXY_PORT=443
+      - ATL_LICENSE_KEY=<key>
+      - JVM_MAXIMUM_MEMORY=6G
+
+      
+  postgresql:
+    image: postgres:11
+    container_name: postgres
+    hostname: postgres
+    restart: always
+    networks:
+      - confluence_network
+    volumes:
+      - postgresql_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=confluence_database_user
+      - POSTGRES_PASSWORD=confluence_database_password
+      - POSTGRES_DB=confluence_database
+
+volumes:
+  confluence_data:
+    external: false
+  confluence_home:
+    external: false
+  postgresql_data:
+    external: false
+
+networks:
+  confluence_network:
+    driver: bridge

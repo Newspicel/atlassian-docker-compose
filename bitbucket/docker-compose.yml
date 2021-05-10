@@ -1,0 +1,56 @@
+version: '3.5'
+
+services:
+  bitbucket:
+    image: atlassian/bitbucket
+    container_name: bitbucket
+    hostname: bitbucket
+    restart: always
+    networks:
+      - bitbucket_network
+    volumes:
+      - bitbucket_data:/opt/atlassian
+      - bitbucket_home:/var/atlassian
+    ports:
+      - '7990:7990'
+      - '7999:7999'
+      - '7992:7992'
+      - '7993:7993'
+    environment:
+      - JDBC_URL=jdbc:postgresql://postgresql:5432/bitbucket_database
+      - JDBC_USER=bitbucket_database_user
+      - JDBC_PASSWORD=bitbucket_database_password
+      - JDBC_DRIVER=postgresql
+      - SERVER_PROXY_NAME=bitbucket.<url>
+      - SERVER_SCHEME=https
+      - SERVER_SECURE=true
+      - SERVER_PROXY_PORT=443
+      - ATL_LICENSE_KEY=<key>
+      - JVM_MAXIMUM_MEMORY=3G
+
+      
+  postgresql:
+    image: postgres:11
+    container_name: postgres
+    hostname: postgres
+    restart: always
+    networks:
+      - bitbucket_network
+    volumes:
+      - postgresql_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=bitbucket_database_user
+      - POSTGRES_PASSWORD=bitbucket_database_password
+      - POSTGRES_DB=bitbucket_database
+
+volumes:
+  bitbucket_data:
+    external: false
+  bitbucket_home:
+    external: false
+  postgresql_data:
+    external: false
+
+networks:
+  bitbucket_network:
+    driver: bridge

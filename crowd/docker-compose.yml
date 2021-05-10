@@ -1,0 +1,49 @@
+version: '3.5'
+
+services:
+  crowd:
+    image: atlassian/crowd
+    container_name: crowd
+    hostname: crowd
+    restart: always
+    networks:
+      - crowd_network
+    volumes:
+      - crowd_data:/opt/atlassian
+      - crowd_home:/var/atlassian
+    ports:
+      - '8095:8095'
+    environment:
+      - ATL_PROXY_NAME=crowd.<url>
+      - ATL_TOMCAT_SCHEME=https
+      - ATL_TOMCAT_SECURE=true
+      - ATL_PROXY_PORT=443
+      - ATL_LICENSE_KEY=<key>
+      - JVM_MAXIMUM_MEMORY=2G
+
+      
+  postgresql:
+    image: postgres:11
+    container_name: postgres
+    hostname: postgres
+    restart: always
+    networks:
+      - crowd_network
+    volumes:
+      - postgresql_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=crowd_database_user
+      - POSTGRES_PASSWORD=crowd_database_password
+      - POSTGRES_DB=crowd_database
+
+volumes:
+  crowd_data:
+    external: false
+  crowd_home:
+    external: false
+  postgresql_data:
+    external: false
+
+networks:
+  crowd_network:
+    driver: bridge

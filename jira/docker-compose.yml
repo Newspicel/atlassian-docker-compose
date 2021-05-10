@@ -1,0 +1,53 @@
+version: '3.5'
+
+services:
+  jira:
+    image: atlassian/jira-core
+    container_name: jira
+    hostname: jira
+    restart: always
+    networks:
+      - jira_network
+    volumes:
+      - jira_data:/opt/atlassian
+      - jira_home:/var/atlassian
+    ports:
+      - '8080:8080'
+    environment:
+      - ATL_JDBC_URL=jdbc:postgresql://postgresql:5432/jira_database
+      - ATL_JDBC_USER=jira_database_user
+      - ATL_JDBC_PASSWORD=jira_database_password
+      - ATL_DB_TYPE=postgresql
+      - ATL_PROXY_NAME=jira.<url>
+      - ATL_TOMCAT_SCHEME=https
+      - ATL_TOMCAT_SECURE=true
+      - ATL_PROXY_PORT=443
+      - ATL_LICENSE_KEY=<key>
+      - JVM_MAXIMUM_MEMORY=4G
+
+      
+  postgresql:
+    image: postgres:11
+    container_name: postgres
+    hostname: postgres
+    restart: always
+    networks:
+      - jira_network
+    volumes:
+      - postgresql_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=jira_database_user
+      - POSTGRES_PASSWORD=jira_database_password
+      - POSTGRES_DB=jira_database
+
+volumes:
+  jira_data:
+    external: false
+  jira_home:
+    external: false
+  postgresql_data:
+    external: false
+
+networks:
+  jira_network:
+    driver: bridge
